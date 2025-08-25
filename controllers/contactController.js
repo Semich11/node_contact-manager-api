@@ -2,8 +2,14 @@ const contactModel = require("../model/contactModel");
 
 const getContacts = async (req, res) => {
   try {
-    const contact = await contactModel.find();
-    res.json(contact);
+    console.log("Get all contact method")
+    const contacts = await contactModel.find();
+
+    if(!contacts) {
+      return res.status(404).send({success: false, message: "Contact not found" });
+    }
+
+    res.json({success: true, data: contacts});
   } catch (error) {
     res
       .status(500)
@@ -12,29 +18,35 @@ const getContacts = async (req, res) => {
 };
 
 const getContactByID = async (req, res) => {
-  try{
+  try {
     const { id } = req.params;
     const contact = await contactModel.findById(id);
-  
+
+    if(!contact) {
+      return res.status(404).send({success: false, message: "Contact not found" });
+    }
+
     res.json(contact);
-  } catch(error) {
-    res.status(404).json({
-      success: false,
-      data: `❌ Contact not found: ${error.message}`
-    })
+  } catch (err) {
+    res
+      .status(500)
+      .send({ success: false, message: "Internal Server Error: " });
   }
 };
 
 const createContact = async (req, res) => {
-  try{
-
+  try {
     const newContact = await contactModel.create(req.body);
+
+    if(!newContact) {
+      return res.status(400).send({success: false, message: "Bad request" });
+    }
+    
     res.json(newContact);
-  } catch(error) {
-    res.status(500).json({
-      success: false,
-      data: `❌ 500 Internal Server Error: ${error}`
-    })
+  } catch (err) {
+    res
+      .status(500)
+      .send({ success: false, message: "Internal Server Error: " });
   }
 };
 
@@ -43,39 +55,49 @@ const editContact = async (req, res) => {
     const { id } = req.params;
     const newContact = req.body;
 
-    const editedContact = await contactModel.findByIdAndUpdate(
-      id,
-      newContact,
-      { new: true, runValidators: true }
-    );
+    const editedContact = await contactModel.findByIdAndUpdate(id, newContact, {
+      new: true,
+      runValidators: true,
+    });
 
-    if (!editedContact) {
-      return res.status(404).send({ message: "Contact not found" });
+
+    if(!editedContact) {
+      return res.status(400).send({success: false, message: "Bad request" });
     }
+
 
     res.send(editedContact);
   } catch (err) {
-    res.status(500).send({ message: err.message });
+    res
+      .status(500)
+      .send({ success: false, message: "Internal Server Error: " });
   }
 };
 
+const deleteContact = async (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log("Delete method");
 
-// const deleteContact = (req, res) => {
-//   const { id } = req.params;
+    const deletedContact = await contactModel.findOneAndDelete(id);
+    console.log("object");
 
-//   const findContactWithHisID = findContact(id, res);
+    if (!deletedContact) {
+      return res.status(404).send({success: false, message: "Contact not found" });
+    }
 
-//   const newContactAfterOneIsdeleted = contacts.filter(
-//     (contact) => contact.id !== findContactWithHisID.id
-//   );
-
-//   res.send(newContactAfterOneIsdeleted);
-// };
+    res.send(deletedContact);
+  } catch (err) {
+    res
+      .status(500)
+      .send({ success: false, message: "Internal Server Error: " });
+  }
+};
 
 module.exports = {
   getContacts,
   getContactByID,
   createContact,
   editContact,
-  //   deleteContact,
+  deleteContact,
 };

@@ -11,8 +11,6 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use("/api", router);
 
-
-
 const PORT = process.env.PORT || 9000;
 const MONGOURL = process.env.MONGO_URL;
 
