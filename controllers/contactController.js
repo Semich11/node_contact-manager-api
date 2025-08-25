@@ -1,65 +1,73 @@
-const contacts = require("../contact");
+const contactsModel = require("../model/contactModel");
 
-const getContacts = (req, res) => {
-  res.send(contacts);
+const getContacts = async (req, res) => {
+  try {
+    const contact = await contactsModel.find();
+    res.json(contact);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching contacts", error: error.message });
+  }
 };
 
-const getContactByID = (req, res) => {
-  const { id } = req.params;
-  const findContactWithHisID = findContact(id, res);
 
-  res.send(findContactWithHisID);
-};
+// const getContactByID = (req, res) => {
+//   const { id } = req.params;
+//   const findContactWithHisID = findContact(id, res);
 
-const createContact = (req, res) => {
-  const newContact = contacts.push(req.body);
-  res.send(contacts);
-};
+//   res.send(findContactWithHisID);
+// };
 
-const editContact = (req, res) => {
-  const { id } = req.params;
-  const newContact = req.body;
+// const createContact = (req, res) => {
+//   const newContact = contacts.push(req.body);
+//   res.send(contacts);
+// };
 
-  const findContactWithHisID = findContact(id, res);
-  const editedContacts = contacts.map((contact) => {
-    if (contact.id === Number(findContactWithHisID.id)) {
-      return { ...contact, ...newContact };
-    }
-    return contact;
-  });
+// const editContact = (req, res) => {
+//   const { id } = req.params;
+//   const newContact = req.body;
 
-  res.send(editedContacts);
-};
+//   const findContactWithHisID = findContact(id, res);
+//   const editedContacts = contacts.map((contact) => {
+//     if (contact.id === Number(findContactWithHisID.id)) {
+//       return { ...contact, ...newContact };
+//     }
+//     return contact;
+//   });
 
-const deleteContact = (req, res) => {
-  const { id } = req.params;
+//   res.send(editedContacts);
+// };
 
-  const findContactWithHisID = findContact(id, res);
+// const deleteContact = (req, res) => {
+//   const { id } = req.params;
 
-  const newContactAfterOneIsdeleted = contacts.filter(
-    (contact) => contact.id !== findContactWithHisID.id
-  );
+//   const findContactWithHisID = findContact(id, res);
 
-  res.send(newContactAfterOneIsdeleted);
-};
+//   const newContactAfterOneIsdeleted = contacts.filter(
+//     (contact) => contact.id !== findContactWithHisID.id
+//   );
+
+//   res.send(newContactAfterOneIsdeleted);
+// };
 
 module.exports = {
-  getContacts,
-  getContactByID,
-  createContact,
-  editContact,
-  deleteContact,
+  getContacts
+//   getContactByID,
+//   createContact,
+//   editContact,
+//   deleteContact,
 };
 
-function findContact(id, res) {
-  const findContactWithHisID = contacts.find(
-    (contact) => contact.id === Number(id)
-  );
 
-  if (!findContactWithHisID) {
-    return res
-      .status(404)
-      .json({ success: false, message: "Contact not found!" });
-  }
-  return findContactWithHisID;
-}
+
+// function findContact(id, res) {
+//   const findContactWithHisID = contacts.find(
+//     (contact) => contact.id === Number(id)
+//   );
+
+//   if (!findContactWithHisID) {
+//     return res
+//       .status(404)
+//       .json({ success: false, message: "Contact not found!" });
+//   }
+//   return findContactWithHisID;
+// }
