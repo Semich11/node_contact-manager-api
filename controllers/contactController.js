@@ -1,26 +1,28 @@
-const contactsModel = require("../model/contactModel");
+const contactModel = require("../model/contactModel");
 
 const getContacts = async (req, res) => {
   try {
-    const contact = await contactsModel.find();
+    const contact = await contactModel.find();
+    console.log(contacts.map(c => c._id.toString()));
     res.json(contact);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching contacts", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error fetching contacts", error: error.message });
   }
 };
 
+const getContactByID = async (req, res) => {
+  const { id } = req.params;
+  const contact = await contactModel.findById(id);
 
-// const getContactByID = (req, res) => {
-//   const { id } = req.params;
-//   const findContactWithHisID = findContact(id, res);
+  res.json(contact);
+};
 
-//   res.send(findContactWithHisID);
-// };
-
-// const createContact = (req, res) => {
-//   const newContact = contacts.push(req.body);
-//   res.send(contacts);
-// };
+const createContact = async (req, res) => {
+  const newContact = await contactModel.create(req.body);
+  res.json(newContact);
+};
 
 // const editContact = (req, res) => {
 //   const { id } = req.params;
@@ -50,24 +52,22 @@ const getContacts = async (req, res) => {
 // };
 
 module.exports = {
-  getContacts
-//   getContactByID,
-//   createContact,
-//   editContact,
-//   deleteContact,
+  getContacts,
+  getContactByID,
+    createContact,
+  //   editContact,
+  //   deleteContact,
 };
 
+function findContact(id, res) {
+  const findContactWithHisID = contactModel.find(
+    (contact) => contact.id === Number(id)
+  );
 
-
-// function findContact(id, res) {
-//   const findContactWithHisID = contacts.find(
-//     (contact) => contact.id === Number(id)
-//   );
-
-//   if (!findContactWithHisID) {
-//     return res
-//       .status(404)
-//       .json({ success: false, message: "Contact not found!" });
-//   }
-//   return findContactWithHisID;
-// }
+  if (!findContactWithHisID) {
+    return res
+      .status(404)
+      .json({ success: false, message: "Contact not found!" });
+  }
+  return findContactWithHisID;
+}
