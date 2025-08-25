@@ -3,7 +3,6 @@ const contactModel = require("../model/contactModel");
 const getContacts = async (req, res) => {
   try {
     const contact = await contactModel.find();
-    console.log(contacts.map(c => c._id.toString()));
     res.json(contact);
   } catch (error) {
     res
@@ -13,31 +12,53 @@ const getContacts = async (req, res) => {
 };
 
 const getContactByID = async (req, res) => {
-  const { id } = req.params;
-  const contact = await contactModel.findById(id);
-
-  res.json(contact);
+  try{
+    const { id } = req.params;
+    const contact = await contactModel.findById(id);
+  
+    res.json(contact);
+  } catch(error) {
+    res.status(404).json({
+      success: false,
+      data: `❌ Contact not found: ${error.message}`
+    })
+  }
 };
 
 const createContact = async (req, res) => {
-  const newContact = await contactModel.create(req.body);
-  res.json(newContact);
+  try{
+
+    const newContact = await contactModel.create(req.body);
+    res.json(newContact);
+  } catch(error) {
+    res.status(500).json({
+      success: false,
+      data: `❌ 500 Internal Server Error: ${error}`
+    })
+  }
 };
 
-// const editContact = (req, res) => {
-//   const { id } = req.params;
-//   const newContact = req.body;
+const editContact = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const newContact = req.body;
 
-//   const findContactWithHisID = findContact(id, res);
-//   const editedContacts = contacts.map((contact) => {
-//     if (contact.id === Number(findContactWithHisID.id)) {
-//       return { ...contact, ...newContact };
-//     }
-//     return contact;
-//   });
+    const editedContact = await contactModel.findByIdAndUpdate(
+      id,
+      newContact,
+      { new: true, runValidators: true }
+    );
 
-//   res.send(editedContacts);
-// };
+    if (!editedContact) {
+      return res.status(404).send({ message: "Contact not found" });
+    }
+
+    res.send(editedContact);
+  } catch (err) {
+    res.status(500).send({ message: err.message });
+  }
+};
+
 
 // const deleteContact = (req, res) => {
 //   const { id } = req.params;
@@ -54,20 +75,7 @@ const createContact = async (req, res) => {
 module.exports = {
   getContacts,
   getContactByID,
-    createContact,
-  //   editContact,
+  createContact,
+  editContact,
   //   deleteContact,
 };
-
-function findContact(id, res) {
-  const findContactWithHisID = contactModel.find(
-    (contact) => contact.id === Number(id)
-  );
-
-  if (!findContactWithHisID) {
-    return res
-      .status(404)
-      .json({ success: false, message: "Contact not found!" });
-  }
-  return findContactWithHisID;
-}
